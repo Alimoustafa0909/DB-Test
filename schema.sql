@@ -4,6 +4,14 @@ CREATE TABLE Departments (
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
+-- classrooms table
+CREATE TABLE Classrooms (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    building VARCHAR(50) NOT NULL,
+    room_number VARCHAR(10) NOT NULL,
+    capacity INT NOT NULL
+);
+
 -- instructors table 
 CREATE TABLE Instructors (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -43,13 +51,7 @@ CREATE TABLE Semesters (
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- classrooms table
-CREATE TABLE Classrooms (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    building VARCHAR(50) NOT NULL,
-    room_number VARCHAR(10) NOT NULL,
-    capacity INT NOT NULL
-);
+
 
 -- enrollments table to link students with courses in a specific semester
 CREATE TABLE Enrollments (

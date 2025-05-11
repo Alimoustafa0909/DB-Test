@@ -16,78 +16,87 @@ ORDER BY gpa DESC
 LIMIT 5;
 
 
+
 -- 2=> Courses with no enrollments in a given semester
-SELECT c.course_id, c.course_name
-FROM Courses c
+SELECT Courses.id, Courses.name
+FROM Courses
 WHERE NOT EXISTS (
-    SELECT 1 FROM Enrollments e
-    WHERE e.course_id = c.course_id AND e.semester_id = 1
+    SELECT 1 FROM Enrollments
+    WHERE Enrollments.course_id = Courses.id
+      AND Enrollments.semester_id = "Spring"  -- Replace 1 with the semester you are checking
 );
 
 -- 3=> Average grade per course across all semesters
-SELECT c.course_id, c.course_name, AVG(e.grade) AS avg_grade
-FROM Enrollments e
-JOIN Courses c ON e.course_id = c.course_id
-GROUP BY c.course_id;
+SELECT Courses.id, Courses.name, AVG(Enrollments.grade) AS average_grade
+FROM Enrollments
+JOIN Courses ON Enrollments.course_id = Courses.id
+GROUP BY Courses.id;
+
 
 -- 4=> Instructors teaching more than 3 courses in a single semester
-SELECT instructor_id, semester_id, COUNT(DISTINCT course_id) AS course_count
-FROM Course_Instructors
-GROUP BY instructor_id, semester_id
-HAVING course_count > 3;
+SELECT Courses.id, Courses.name, AVG(Enrollments.grade) AS average_grade
+FROM Enrollments
+JOIN Courses ON Enrollments.course_id = Courses.id
+GROUP BY Courses.id;
+
 
 -- 5=> All courses a particular student is enrolled in, ordered by semester
-SELECT s.student_id, s.student_name, c.course_name, sem.name AS semester
-FROM Enrollments e
-JOIN Students s ON e.student_id = s.student_id
-JOIN Courses c ON e.course_id = c.course_id
-JOIN Semesters sem ON e.semester_id = sem.semester_id
-WHERE s.student_id = 1
-ORDER BY sem.semester_id;
+SELECT Students.id, Students.name, Courses.name, Semesters.name
+FROM Enrollments
+JOIN Students ON Enrollments.student_id = Students.id
+JOIN Courses ON Enrollments.course_id = Courses.id
+JOIN Semesters ON Enrollments.semester_id = Semesters.id
+WHERE Students.id = 1  -- Change 1 to the student ID you want to check
+ORDER BY Semesters.id;
 
 -- 6=> Department statistics: avg class size
-SELECT d.dept_id, d.dept_name, 
-       COUNT(e.student_id) / NULLIF(COUNT(DISTINCT c.course_id), 0) AS avg_class_size
-FROM Departments d
-JOIN Courses c ON c.dept_id = d.dept_id
-JOIN Enrollments e ON e.course_id = c.course_id
-GROUP BY d.dept_id;
+SELECT Departments.id, Departments.name, 
+       COUNT(Enrollments.student_id) / NULLIF(COUNT(DISTINCT Courses.id), 0) AS average_class_size
+FROM Departments
+JOIN Courses ON Courses.department_id = Departments.id
+JOIN Enrollments ON Enrollments.course_id = Courses.id
+GROUP BY Departments.id;
+
 
 -- 7=> Students at risk (GPA < 2.0 in any semester)
-SELECT s.student_id, s.student_name
-FROM Enrollments e
-JOIN Students s ON e.student_id = s.student_id
-GROUP BY s.student_id, e.semester_id
-HAVING AVG(e.grade) < 2.0;
+SELECT Students.id, Students.name
+FROM Enrollments
+JOIN Students ON Enrollments.student_id = Students.id
+GROUP BY Students.id, Enrollments.semester_id
+HAVING AVG(Enrollments.grade) < 2.0;
 
 -- 8=>> Students who took all CS courses
-SELECT s.student_id, s.student_name
-FROM Students s
+SELECT Students.id, Students.name
+FROM Students
 WHERE NOT EXISTS (
-  SELECT course_id FROM Courses c
-  JOIN Departments d ON c.dept_id = d.dept_id
-  WHERE d.dept_name = 'Computer Science'
-  AND NOT EXISTS (
-    SELECT 1 FROM Enrollments e 
-    WHERE e.student_id = s.student_id AND e.course_id = c.course_id
-  )
+    SELECT Courses.id 
+    FROM Courses
+    JOIN Departments ON Courses.department_id = Departments.id
+    WHERE Departments.name = 'Computer Science'
+    AND NOT EXISTS (
+        SELECT Enrollments.id 
+        FROM Enrollments 
+        WHERE Enrollments.student_id = Students.id 
+        AND Enrollments.course_id = Courses.id
+    )
 );
 
 -- 9-> Rank students within department by GPA
-SELECT s.student_id, s.student_name, d.dept_name,
-       RANK() OVER (PARTITION BY d.dept_id ORDER BY AVG(e.grade) DESC) AS dept_rank
-FROM Students s
-JOIN Enrollments e ON s.student_id = e.student_id
-JOIN Departments d ON s.major_dept_id = d.dept_id
-GROUP BY s.student_id;
+SELECT Students.id, Students.name, Departments.name, 
+       RANK() OVER (PARTITION BY Departments.id ORDER BY AVG(Enrollments.grade) DESC) AS department_rank
+FROM Students
+JOIN Enrollments ON Students.id = Enrollments.student_id
+JOIN Departments ON Students.department_id = Departments.id
+GROUP BY Students.id, Departments.id;
 
 -- 10=> Drop semester’s enrollments if empty
-SET @sem_id = 3; -- Change this as needed
+SET @semester_id = 3;  -- Change to the semester you want to delete
 
-DELETE FROM Enrollments WHERE semester_id = @sem_id;
+DELETE FROM Enrollments
+WHERE semester_id = @semester_id;
 
 DELETE FROM Semesters
-WHERE semester_id = @sem_id
+WHERE id = @semester_id
 AND NOT EXISTS (
-  SELECT 1 FROM Enrollments WHERE semester_id = @sem_id
+    SELECT 1 FROM Enrollments WHERE semester_id = @semester_id
 );

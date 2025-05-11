@@ -1,208 +1,231 @@
--- ============================
+-- ------------------------------------------------
 -- SCHEMA: CREATE TABLES
--- ============================
+-- ------------------------------------------------
 
+-- departments table
 CREATE TABLE Departments (
-    dept_id INT PRIMARY KEY AUTO_INCREMENT,
-    dept_name VARCHAR(100) NOT NULL UNIQUE
-);
-
-CREATE TABLE Instructors (
-    instructor_id INT PRIMARY KEY AUTO_INCREMENT,
-    instructor_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    phone VARCHAR(20),
-    dept_id INT,
-    hire_date DATE,
-    FOREIGN KEY (dept_id) REFERENCES Departments(dept_id)
-);
-
-CREATE TABLE Students (
-    student_id INT PRIMARY KEY AUTO_INCREMENT,
-    student_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    dob DATE,
-    enroll_date DATE NOT NULL,
-    major_dept_id INT,
-    FOREIGN KEY (major_dept_id) REFERENCES Departments(dept_id)
-);
-
-CREATE TABLE Courses (
-    course_id INT PRIMARY KEY AUTO_INCREMENT,
-    course_name VARCHAR(100) NOT NULL,
-    credits INT NOT NULL,
-    dept_id INT,
-    FOREIGN KEY (dept_id) REFERENCES Departments(dept_id)
-);
-
-CREATE TABLE Semesters (
-    semester_id INT PRIMARY KEY AUTO_INCREMENT,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
+-- classrooms table
 CREATE TABLE Classrooms (
-    classroom_id INT PRIMARY KEY AUTO_INCREMENT,
-    building VARCHAR(100) NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    building VARCHAR(50) NOT NULL,
     room_number VARCHAR(10) NOT NULL,
     capacity INT NOT NULL
 );
 
+-- instructors table 
+CREATE TABLE Instructors (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20),
+    department_id INT,
+    hire_date DATE,
+    FOREIGN KEY (department_id) REFERENCES Departments(id)
+);
+
+-- students table 
+CREATE TABLE Students (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(40) NOT NULL UNIQUE,
+    date_of_birth DATE,
+    enroll_date DATE NOT NULL,
+    department_id INT, -- the department the student is gonna study on it in
+    FOREIGN KEY (department_id) REFERENCES Departments(id)
+);
+
+-- courses table
+CREATE TABLE Courses (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    credit_hour INT NOT NULL, -- number of credit hours for the course
+    department_id INT,
+    classroom_id INT,
+    FOREIGN KEY (department_id) REFERENCES Departments(id),
+    FOREIGN KEY (classroom_id) REFERENCES Classrooms(id)
+);
+
+-- semesters table 
+CREATE TABLE Semesters (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+
+
+-- enrollments table to link students with courses in a specific semester
 CREATE TABLE Enrollments (
-    enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     student_id INT,
     course_id INT,
     semester_id INT,
     grade DECIMAL(3,2),
-    FOREIGN KEY (student_id) REFERENCES Students(student_id),
-    FOREIGN KEY (course_id) REFERENCES Courses(course_id),
-    FOREIGN KEY (semester_id) REFERENCES Semesters(semester_id)
+    FOREIGN KEY (student_id) REFERENCES Students(id),
+    FOREIGN KEY (course_id) REFERENCES Courses(id),
+    FOREIGN KEY (semester_id) REFERENCES Semesters(id)
 );
 
-CREATE TABLE Course_Classroom (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    course_id INT,
-    classroom_id INT,
-    semester_id INT,
-    FOREIGN KEY (course_id) REFERENCES Courses(course_id),
-    FOREIGN KEY (classroom_id) REFERENCES Classrooms(classroom_id),
-    FOREIGN KEY (semester_id) REFERENCES Semesters(semester_id)
-);
 
-CREATE TABLE Course_Instructors (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    course_id INT,
-    instructor_id INT,
-    semester_id INT,
-    FOREIGN KEY (course_id) REFERENCES Courses(course_id),
-    FOREIGN KEY (instructor_id) REFERENCES Instructors(instructor_id),
-    FOREIGN KEY (semester_id) REFERENCES Semesters(semester_id)
-);
 
--- ============================
+-- ------------------------------------
 -- VIEWS
--- ============================
+-- ------------------------------------------------
 
-CREATE VIEW Student_Course_Grades AS
-SELECT s.student_id, s.student_name, c.course_id, c.course_name, sem.name AS semester, e.grade
-FROM Enrollments e
-JOIN Students s ON e.student_id = s.student_id
-JOIN Courses c ON e.course_id = c.course_id
-JOIN Semesters sem ON e.semester_id = sem.semester_id;
+-- Student Course
+CREATE VIEW student_course_grades AS
+SELECT 
+    Students.id,
+    Students.name,
+    Courses.id,
+    Courses.name,
+    Semesters.name,
+    Enrollments.grade
+FROM Enrollments
+JOIN Students ON Enrollments.student_id = Students.id
+JOIN Courses ON Enrollments.course_id = Courses.id
+JOIN Semesters ON Enrollments.semester_id = Semesters.id;
 
-CREATE VIEW Course_Enrollment_Count AS
-SELECT c.course_id, c.course_name, sem.name AS semester, COUNT(*) AS total_enrolled
-FROM Enrollments e
-JOIN Courses c ON e.course_id = c.course_id
-JOIN Semesters sem ON e.semester_id = sem.semester_id
-GROUP BY c.course_id, sem.semester_id;
+--  Course Enrollment Count
+CREATE VIEW course_enrollment_count AS
+SELECT 
+    Courses.id,
+    Courses.name,
+    Semesters.name,
+    COUNT(Enrollments.id)
+FROM Enrollments
+JOIN Courses ON Enrollments.course_id = Courses.id
+JOIN Semesters ON Enrollments.semester_id = Semesters.id
+GROUP BY Courses.id, Semesters.id;
 
-CREATE VIEW Department_Load AS
-SELECT d.dept_id, d.dept_name, sem.name AS semester,
-       COUNT(DISTINCT c.course_id) AS total_courses_offered,
-       COUNT(e.student_id) AS total_students_enrolled
-FROM Departments d
-LEFT JOIN Courses c ON c.dept_id = d.dept_id
-LEFT JOIN Enrollments e ON e.course_id = c.course_id
-LEFT JOIN Semesters sem ON e.semester_id = sem.semester_id
-GROUP BY d.dept_id, sem.semester_id;
 
--- ============================
+-- Department Load
+CREATE VIEW department_load AS
+SELECT 
+    Departments.id,
+    Departments.name,
+    Semesters.name,
+    COUNT(DISTINCT Courses.id),
+    COUNT(Enrollments.student_id)
+FROM Departments
+LEFT JOIN Courses ON Courses.department_id = Departments.id
+LEFT JOIN Enrollments ON Enrollments.course_id = Courses.id
+LEFT JOIN Semesters ON Enrollments.semester_id = Semesters.id
+GROUP BY Departments.id, Semesters.id;
+
+
+-- ------------------------------------
 -- QUERIES
--- ============================
+-- ------------------------
 
--- 1. Top 5 Students by GPA in the most recent semester
-SELECT e.student_id, s.student_name, sem.name AS semester, 
-       AVG(e.grade) AS gpa
-FROM Enrollments e
-JOIN Students s ON e.student_id = s.student_id
-JOIN Semesters sem ON e.semester_id = sem.semester_id
-WHERE sem.name = (SELECT name FROM Semesters ORDER BY semester_id DESC LIMIT 1)
-GROUP BY e.student_id, sem.semester_id
+-- 1=Top 5 Students by GPA in the most recent semester
+SELECT 
+    Students.id,
+    Students.name,
+    Semesters.name,
+    AVG(Enrollments.grade) AS gpa
+FROM Enrollments
+JOIN Students ON Enrollments.student_id = Students.id
+JOIN Semesters ON Enrollments.semester_id = Semesters.id
+WHERE Enrollments.semester_id = (SELECT MAX(id) FROM Semesters)
+GROUP BY Students.id, Semesters.id
 ORDER BY gpa DESC
 LIMIT 5;
 
--- 2. Courses with no enrollments in a given semester
-SELECT c.course_id, c.course_name
-FROM Courses c
+
+
+-- 2=> Courses with no enrollments in a given semester
+SELECT Courses.id, Courses.name
+FROM Courses
 WHERE NOT EXISTS (
-    SELECT 1 FROM Enrollments e
-    WHERE e.course_id = c.course_id AND e.semester_id = 1
+    SELECT 1 FROM Enrollments
+    WHERE Enrollments.course_id = Courses.id
+      AND Enrollments.semester_id = "Spring"  -- Replace 1 with the semester you are checking
 );
 
--- 3. Average grade per course across all semesters
-SELECT c.course_id, c.course_name, AVG(e.grade) AS avg_grade
-FROM Enrollments e
-JOIN Courses c ON e.course_id = c.course_id
-GROUP BY c.course_id;
+-- 3=> Average grade per course across all semesters
+SELECT Courses.id, Courses.name, AVG(Enrollments.grade) AS average_grade
+FROM Enrollments
+JOIN Courses ON Enrollments.course_id = Courses.id
+GROUP BY Courses.id;
 
--- 4. Instructors teaching more than 3 courses in a single semester
-SELECT instructor_id, semester_id, COUNT(DISTINCT course_id) AS course_count
-FROM Course_Instructors
-GROUP BY instructor_id, semester_id
-HAVING course_count > 3;
 
--- 5. All courses a particular student is enrolled in, ordered by semester
-SELECT s.student_id, s.student_name, c.course_name, sem.name AS semester
-FROM Enrollments e
-JOIN Students s ON e.student_id = s.student_id
-JOIN Courses c ON e.course_id = c.course_id
-JOIN Semesters sem ON e.semester_id = sem.semester_id
-WHERE s.student_id = 1
-ORDER BY sem.semester_id;
+-- 4=> Instructors teaching more than 3 courses in a single semester
+SELECT Courses.id, Courses.name, AVG(Enrollments.grade) AS average_grade
+FROM Enrollments
+JOIN Courses ON Enrollments.course_id = Courses.id
+GROUP BY Courses.id;
 
--- 6. Department statistics: avg class size
-SELECT d.dept_id, d.dept_name, 
-       COUNT(e.student_id) / NULLIF(COUNT(DISTINCT c.course_id), 0) AS avg_class_size
-FROM Departments d
-JOIN Courses c ON c.dept_id = d.dept_id
-JOIN Enrollments e ON e.course_id = c.course_id
-GROUP BY d.dept_id;
 
--- 7. Students at risk (GPA < 2.0 in any semester)
-SELECT s.student_id, s.student_name
-FROM Enrollments e
-JOIN Students s ON e.student_id = s.student_id
-GROUP BY s.student_id, e.semester_id
-HAVING AVG(e.grade) < 2.0;
+-- 5=> All courses a particular student is enrolled in, ordered by semester
+SELECT Students.id, Students.name, Courses.name, Semesters.name
+FROM Enrollments
+JOIN Students ON Enrollments.student_id = Students.id
+JOIN Courses ON Enrollments.course_id = Courses.id
+JOIN Semesters ON Enrollments.semester_id = Semesters.id
+WHERE Students.id = 1  -- Change 1 to the student ID you want to check
+ORDER BY Semesters.id;
 
--- 8. Students who took all CS courses
-SELECT s.student_id, s.student_name
-FROM Students s
+-- 6=> Department statistics: avg class size
+SELECT Departments.id, Departments.name, 
+       COUNT(Enrollments.student_id) / NULLIF(COUNT(DISTINCT Courses.id), 0) AS average_class_size
+FROM Departments
+JOIN Courses ON Courses.department_id = Departments.id
+JOIN Enrollments ON Enrollments.course_id = Courses.id
+GROUP BY Departments.id;
+
+
+-- 7=> Students at risk (GPA < 2.0 in any semester)
+SELECT Students.id, Students.name
+FROM Enrollments
+JOIN Students ON Enrollments.student_id = Students.id
+GROUP BY Students.id, Enrollments.semester_id
+HAVING AVG(Enrollments.grade) < 2.0;
+
+-- 8=>> Students who took all CS courses
+SELECT Students.id, Students.name
+FROM Students
 WHERE NOT EXISTS (
-  SELECT course_id FROM Courses c
-  JOIN Departments d ON c.dept_id = d.dept_id
-  WHERE d.dept_name = 'Computer Science'
-  AND NOT EXISTS (
-    SELECT 1 FROM Enrollments e 
-    WHERE e.student_id = s.student_id AND e.course_id = c.course_id
-  )
+    SELECT Courses.id 
+    FROM Courses
+    JOIN Departments ON Courses.department_id = Departments.id
+    WHERE Departments.name = 'Computer Science'
+    AND NOT EXISTS (
+        SELECT Enrollments.id 
+        FROM Enrollments 
+        WHERE Enrollments.student_id = Students.id 
+        AND Enrollments.course_id = Courses.id
+    )
 );
 
--- 9. Rank students within department by GPA
-SELECT s.student_id, s.student_name, d.dept_name,
-       RANK() OVER (PARTITION BY d.dept_id ORDER BY AVG(e.grade) DESC) AS dept_rank
-FROM Students s
-JOIN Enrollments e ON s.student_id = e.student_id
-JOIN Departments d ON s.major_dept_id = d.dept_id
-GROUP BY s.student_id;
+-- 9-> Rank students within department by GPA
+SELECT Students.id, Students.name, Departments.name, 
+       RANK() OVER (PARTITION BY Departments.id ORDER BY AVG(Enrollments.grade) DESC) AS department_rank
+FROM Students
+JOIN Enrollments ON Students.id = Enrollments.student_id
+JOIN Departments ON Students.department_id = Departments.id
+GROUP BY Students.id, Departments.id;
 
--- 10. Drop semester’s enrollments if empty
-SET @sem_id = 3; -- Change this as needed
+-- 10=> Drop semester’s enrollments if empty
+SET @semester_id = 3;  -- Change to the semester you want to delete
 
-DELETE FROM Enrollments WHERE semester_id = @sem_id;
+DELETE FROM Enrollments
+WHERE semester_id = @semester_id;
 
 DELETE FROM Semesters
-WHERE semester_id = @sem_id
+WHERE id = @semester_id
 AND NOT EXISTS (
-  SELECT 1 FROM Enrollments WHERE semester_id = @sem_id
+    SELECT 1 FROM Enrollments WHERE semester_id = @semester_id
 );
 
--- ============================
+-----------------
 -- SAMPLE DATA
--- ============================
+------------
 
 
--- insert departments
 INSERT INTO Departments (name) VALUES
 ('Computer Science'),
 ('Business Administration'),
@@ -210,7 +233,18 @@ INSERT INTO Departments (name) VALUES
 ('Psychology'),
 ('Media & Design');
 
--- Insert instructors
+
+INSERT INTO Classrooms (building, room_number, capacity) VALUES
+('Science Hall', '101', 50),
+('Engineering Block', '202', 60),
+('Business Center', '303', 45),
+('Psychology Wing', '404', 35),
+('Design Studio', '505', 40),
+('Main Building', 'G01', 80),
+('Annex A', 'B12', 55),
+('Library Hall', '3F', 65);
+
+
 INSERT INTO Instructors (name, email, phone, department_id, hire_date) VALUES
 ('Alice Johnson', 'alice@example.com', '1234567890', 1, '2022-01-15'),
 ('Bob Smith', 'bob@example.com', '2345678901', 1, '2021-03-10'),
@@ -224,7 +258,7 @@ INSERT INTO Instructors (name, email, phone, department_id, hire_date) VALUES
 ('Jake Wood', 'jake@example.com', '0123456789', 5, '2020-04-08');
 
 
--- Insert Students
+
 INSERT INTO Students (name, email, date_of_birth, enroll_date, department_id) VALUES
 ('Peter Sloan', 'emilysavage@hotmail.com', '1999-07-08', '2023-05-19', 2),
 ('Alicia Baker', 'ryandustin@yahoo.com', '2005-07-26', '2023-05-24', 5),
@@ -278,7 +312,8 @@ INSERT INTO Students (name, email, date_of_birth, enroll_date, department_id) VA
 ('Christopher Morris', 'rnielsen@smith.org', '1999-06-12', '2022-09-23', 5);
 
 
--- Insert Courses
+
+
 INSERT INTO Courses (name, credit_hour, department_id, classroom_id) VALUES
 ('Intro to Programming', 3, 1, 1),
 ('Data Structures', 4, 1, 2),
@@ -290,42 +325,213 @@ INSERT INTO Courses (name, credit_hour, department_id, classroom_id) VALUES
 ('Visual Design Basics', 3, 5, 8);
 
 
--- Insert Semesters
+
 INSERT INTO Semesters (name) VALUES
 ('Spring'),
 ('Fall');
 
--- Insert Classrooms
-INSERT INTO Classrooms (building, room_number, capacity) VALUES
-('Science Hall', '101', 50),
-('Engineering Block', '202', 60),
-('Business Center', '303', 45),
-('Psychology Wing', '404', 35),
-('Design Studio', '505', 40),
-('Main Building', 'G01', 80),
-('Annex A', 'B12', 55),
-('Library Hall', '3F', 65);
 
--- Insert Enrollments (sample, repeat for 200 total)
+
+
+
 INSERT INTO Enrollments (student_id, course_id, semester_id, grade) VALUES
-(1, 1, 1, 3.6),
-(2, 2, 1, 3.2),
-(3, 1, 1, 2.9),
-(4, 5, 1, 2.4),
-(5, 6, 1, 3.0),
-(6, 7, 1, 3.8),
-(7, 8, 1, 2.7),
-(8, 3, 1, 3.1),
-(9, 4, 1, 3.4),
-(10, 2, 1, 2.5),
-(1, 2, 2, 3.0),
-(2, 3, 2, 2.2),
-(3, 4, 2, 3.7),
-(4, 1, 2, 2.9),
-(5, 5, 2, 3.2),
-(6, 6, 2, 2.8),
-(7, 7, 2, 2.1),
-(8, 8, 2, 3.9),
-(9, 1, 2, 2.6),
-(10, 2, 2, 3.3);
--- Repeat more for total 200 enrollments as needed
+(22, 2, 2, 3.25),
+(36, 1, 2, 2.8),
+(1, 8, 1, 3.44),
+(34, 6, 1, 2.11),
+(44, 5, 2, 2.64),
+(37, 2, 1, 2.96),
+(24, 3, 1, 2.82),
+(31, 4, 2, 3.41),
+(12, 7, 1, 3.91),
+(3, 1, 2, 3.76),
+(46, 8, 2, 2.34),
+(44, 7, 2, 3.82),
+(46, 1, 2, 3.1),
+(30, 6, 2, 2.26),
+(41, 4, 1, 2.61),
+(9, 6, 1, 3.96),
+(45, 1, 2, 2.17),
+(6, 2, 1, 2.12),
+(43, 5, 1, 2.4),
+(5, 3, 2, 3.48),
+(3, 5, 1, 2.17),
+(23, 7, 1, 2.47),
+(27, 1, 2, 2.75),
+(12, 7, 1, 3.85),
+(24, 2, 2, 3.86),
+(33, 8, 1, 2.8),
+(35, 4, 1, 3.7),
+(9, 1, 2, 2.88),
+(12, 6, 1, 2.94),
+(48, 1, 2, 2.83),
+(2, 3, 1, 3.13),
+(5, 3, 2, 2.57),
+(37, 4, 1, 3.7),
+(46, 7, 1, 2.78),
+(16, 1, 2, 3.46),
+(42, 5, 1, 3.62),
+(13, 7, 2, 2.39),
+(6, 8, 1, 3.5),
+(49, 8, 2, 2.8),
+(11, 2, 2, 3.45),
+(12, 8, 2, 3.9),
+(30, 8, 1, 2.39),
+(6, 1, 2, 3.61),
+(45, 8, 1, 2.69),
+(21, 8, 1, 3.35),
+(35, 1, 1, 2.42),
+(17, 2, 1, 2.55),
+(33, 4, 1, 2.99),
+(22, 6, 1, 3.46),
+(31, 6, 1, 3.83),
+(24, 8, 2, 3.38),
+(23, 6, 1, 3.77),
+(31, 2, 2, 2.52),
+(37, 3, 1, 2.66),
+(36, 8, 2, 2.65),
+(15, 3, 1, 3.44),
+(10, 1, 1, 2.9),
+(18, 3, 1, 3.76),
+(46, 2, 2, 2.13),
+(44, 8, 1, 3.42),
+(10, 4, 1, 2.61),
+(35, 2, 1, 2.84),
+(17, 6, 1, 2.7),
+(33, 2, 2, 3.38),
+(27, 3, 2, 3.22),
+(20, 3, 1, 3.38),
+(42, 5, 2, 2.14),
+(2, 7, 2, 2.66),
+(2, 6, 2, 3.68),
+(38, 7, 1, 3.97),
+(43, 5, 1, 3.16),
+(26, 5, 2, 2.87),
+(2, 5, 2, 3.91),
+(25, 4, 1, 2.1),
+(6, 8, 2, 2.85),
+(18, 7, 1, 3.4),
+(4, 1, 1, 2.68),
+(33, 5, 2, 2.0),
+(35, 2, 1, 3.93),
+(31, 7, 2, 3.82),
+(16, 2, 2, 3.38),
+(18, 1, 1, 3.39),
+(49, 5, 1, 3.59),
+(48, 2, 2, 2.68),
+(13, 4, 1, 2.42),
+(30, 4, 2, 2.37),
+(37, 8, 1, 3.83),
+(18, 1, 1, 3.37),
+(29, 1, 1, 2.7),
+(10, 6, 2, 2.8),
+(29, 3, 1, 2.3),
+(21, 6, 1, 2.86),
+(12, 3, 1, 3.71),
+(33, 8, 2, 2.62),
+(31, 5, 2, 2.73),
+(21, 7, 2, 3.25),
+(30, 6, 1, 3.97),
+(33, 3, 2, 3.64),
+(46, 6, 1, 3.59),
+(23, 7, 1, 2.68),
+(35, 4, 2, 2.89),
+(24, 3, 2, 3.7),
+(9, 3, 2, 3.6),
+(48, 5, 1, 3.33),
+(22, 3, 2, 3.49),
+(43, 7, 2, 2.16),
+(17, 1, 2, 2.86),
+(1, 7, 2, 3.8),
+(7, 4, 2, 2.89),
+(18, 3, 2, 2.62),
+(7, 6, 2, 2.25),
+(24, 4, 2, 3.26),
+(20, 5, 1, 3.14),
+(2, 4, 2, 2.18),
+(21, 3, 2, 3.5),
+(44, 7, 2, 3.71),
+(8, 2, 2, 3.86),
+(35, 8, 2, 3.94),
+(35, 8, 1, 2.28),
+(10, 6, 1, 3.32),
+(43, 3, 1, 2.28),
+(6, 3, 1, 3.61),
+(35, 4, 2, 2.33),
+(13, 7, 2, 3.15),
+(14, 6, 1, 2.97),
+(30, 5, 2, 2.0),
+(5, 8, 1, 2.25),
+(28, 7, 2, 2.92),
+(12, 8, 1, 3.74),
+(38, 2, 2, 2.8),
+(10, 2, 1, 2.23),
+(34, 6, 1, 2.54),
+(45, 2, 2, 3.42),
+(39, 4, 1, 2.56),
+(46, 6, 2, 2.21),
+(32, 8, 1, 2.46),
+(12, 6, 1, 3.67),
+(49, 4, 2, 2.92),
+(36, 7, 1, 2.15),
+(33, 1, 2, 3.28),
+(10, 6, 1, 3.8),
+(40, 3, 1, 2.0),
+(33, 1, 2, 3.69),
+(38, 2, 1, 2.7),
+(18, 4, 1, 3.69),
+(42, 7, 2, 3.13),
+(19, 2, 1, 2.21),
+(39, 8, 1, 3.14),
+(10, 8, 1, 2.3),
+(33, 3, 1, 2.8),
+(3, 2, 1, 2.0),
+(41, 2, 1, 3.74),
+(44, 2, 1, 2.34),
+(31, 3, 2, 3.16),
+(37, 1, 2, 3.1),
+(39, 6, 2, 3.96),
+(30, 5, 1, 3.55),
+(5, 3, 2, 3.36),
+(45, 5, 2, 3.24),
+(32, 5, 1, 2.2),
+(27, 7, 2, 3.96),
+(22, 4, 2, 2.52),
+(41, 2, 1, 2.93),
+(30, 5, 1, 2.85),
+(31, 3, 2, 2.12),
+(11, 5, 1, 2.86),
+(14, 3, 2, 2.42),
+(39, 6, 1, 3.45),
+(41, 2, 2, 2.75),
+(32, 7, 1, 3.8),
+(19, 8, 2, 3.61),
+(48, 5, 2, 3.75),
+(26, 4, 1, 3.16),
+(45, 5, 1, 3.76),
+(6, 7, 2, 3.56),
+(35, 7, 2, 3.62),
+(27, 4, 2, 3.98),
+(39, 8, 1, 3.42),
+(4, 8, 1, 2.14),
+(12, 3, 1, 2.63),
+(13, 5, 2, 2.98),
+(24, 7, 2, 2.75),
+(47, 6, 1, 3.7),
+(47, 7, 2, 3.88),
+(44, 6, 2, 3.79),
+(25, 5, 1, 2.88),
+(26, 4, 2, 3.78),
+(17, 2, 2, 2.21),
+(10, 7, 1, 3.28),
+(43, 1, 1, 3.11),
+(32, 6, 1, 3.6),
+(18, 4, 2, 3.42),
+(38, 8, 2, 2.4),
+(12, 6, 1, 3.58),
+(36, 1, 2, 2.81),
+(29, 8, 1, 3.74),
+(38, 8, 2, 3.62),
+(28, 6, 1, 2.7),
+(33, 8, 2, 2.12),
+(22, 5, 2, 3.89);
