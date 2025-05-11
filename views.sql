@@ -28,7 +28,7 @@ GROUP BY Courses.id, Semesters.id;
 
 
 -- View 3: Department Load
-CREATE OR REPLACE VIEW department_load AS
+CREATE VIEW department_load AS
 SELECT 
     Departments.id AS department_id,
     Departments.name AS department_name,
