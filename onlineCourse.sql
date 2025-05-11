@@ -201,66 +201,109 @@ AND NOT EXISTS (
 -- SAMPLE DATA
 -- ============================
 
--- Insert Departments
-INSERT INTO Departments (dept_name) VALUES
+
+-- insert departments
+INSERT INTO Departments (name) VALUES
 ('Computer Science'),
 ('Business Administration'),
 ('Mechanical Engineering'),
 ('Psychology'),
-('Design & Media');
+('Media & Design');
 
--- Insert Instructors
-INSERT INTO Instructors (instructor_name, email, phone, dept_id, hire_date) VALUES
-('Alice Johnson', 'alice.johnson@example.com', '123-456-7890', 1, '2019-08-01'),
-('Bob Smith', 'bob.smith@example.com', '234-567-8901', 1, '2020-01-15'),
-('Carol Lee', 'carol.lee@example.com', '345-678-9012', 2, '2021-05-10'),
-('David Kim', 'david.kim@example.com', '456-789-0123', 2, '2020-09-25'),
-('Emily Clark', 'emily.clark@example.com', '567-890-1234', 3, '2022-02-18'),
-('Frank White', 'frank.white@example.com', '678-901-2345', 3, '2018-07-07'),
-('Grace Brown', 'grace.brown@example.com', '789-012-3456', 4, '2023-03-05'),
-('Henry Green', 'henry.green@example.com', '890-123-4567', 4, '2021-11-22'),
-('Ivy Black', 'ivy.black@example.com', '901-234-5678', 5, '2017-06-30'),
-('Jake Wood', 'jake.wood@example.com', '012-345-6789', 5, '2019-10-13');
+-- Insert instructors
+INSERT INTO Instructors (name, email, phone, department_id, hire_date) VALUES
+('Alice Johnson', 'alice@example.com', '1234567890', 1, '2022-01-15'),
+('Bob Smith', 'bob@example.com', '2345678901', 1, '2021-03-10'),
+('Carol Lee', 'carol@example.com', '3456789012', 2, '2023-05-01'),
+('David Kim', 'david@example.com', '4567890123', 2, '2020-07-20'),
+('Emily Clark', 'emily@example.com', '5678901234', 3, '2021-08-12'),
+('Frank White', 'frank@example.com', '6789012345', 3, '2019-11-30'),
+('Grace Brown', 'grace@example.com', '7890123456', 4, '2022-06-18'),
+('Henry Green', 'henry@example.com', '8901234567', 4, '2023-02-25'),
+('Ivy Black', 'ivy@example.com', '9012345678', 5, '2021-09-15'),
+('Jake Wood', 'jake@example.com', '0123456789', 5, '2020-04-08');
+
 
 -- Insert Students
-INSERT INTO Students (student_name, email, dob, enroll_date, major_dept_id) VALUES
-('Liam Mason', 'liam.mason@example.com', '2001-04-10', '2022-09-01', 1),
-('Emma Smith', 'emma.smith@example.com', '2000-07-22', '2021-09-01', 2),
-('Noah Johnson', 'noah.johnson@example.com', '2002-01-15', '2023-01-10', 1),
-('Olivia Brown', 'olivia.brown@example.com', '1999-12-05', '2020-09-01', 3),
-('William Lee', 'william.lee@example.com', '2001-06-30', '2022-09-01', 3),
-('Ava Garcia', 'ava.garcia@example.com', '2003-02-14', '2023-09-01', 4),
-('James Martinez', 'james.martinez@example.com', '2002-09-18', '2021-01-15', 4),
-('Sophia Davis', 'sophia.davis@example.com', '2000-10-01', '2020-09-01', 5),
-('Benjamin Miller', 'benjamin.miller@example.com', '2002-11-20', '2022-01-01', 5),
-('Isabella Wilson', 'isabella.wilson@example.com', '2001-05-12', '2022-09-01', 1);
--- Repeat pattern to reach 50 students if needed
+INSERT INTO Students (name, email, date_of_birth, enroll_date, department_id) VALUES
+('Peter Sloan', 'emilysavage@hotmail.com', '1999-07-08', '2023-05-19', 2),
+('Alicia Baker', 'ryandustin@yahoo.com', '2005-07-26', '2023-05-24', 5),
+('Keith Nguyen', 'jacobyang@hotmail.com', '2003-11-09', '2022-05-22', 4),
+('Alex Taylor', 'danielleellison@yahoo.com', '2001-05-25', '2022-12-11', 3),
+('Derrick Barr', 'mchang@schmidt-davis.info', '2004-10-26', '2024-03-07', 5),
+('Lisa Stone', 'blakejohnson@gmail.com', '2006-04-22', '2023-03-06', 1),
+('Sean Robinson', 'jordanpatrick@terry-mcdonald.com', '2005-08-06', '2025-04-10', 3),
+('Kathleen Torres', 'patriciaterrell@gmail.com', '2007-03-21', '2023-03-06', 5),
+('Joseph Ward', 'justin70@dixon.org', '1999-07-31', '2023-01-05', 4),
+('Mark Freeman DVM', 'brian74@love.biz', '2003-04-05', '2025-03-06', 1),
+('David Henry', 'myerssherri@smith.com', '2001-06-03', '2023-11-28', 4),
+('Jose Romero', 'richardjackson@yahoo.com', '2005-06-23', '2024-12-29', 1),
+('Robert Edwards', 'dhenderson@hotmail.com', '2000-05-30', '2023-11-13', 3),
+('Dawn Choi', 'elizabeth48@hotmail.com', '2006-02-20', '2023-05-17', 3),
+('Mr. Troy Mcconnell', 'sarahkline@gmail.com', '2005-04-05', '2023-09-16', 2),
+('Erin Wallace', 'richardjones@sanchez.org', '2005-09-28', '2022-11-24', 5),
+('John Austin', 'garymorgan@yahoo.com', '2002-11-09', '2023-01-08', 3),
+('Jessica Flores MD', 'dominiqueandrews@gmail.com', '1999-07-25', '2023-04-06', 2),
+('Chelsea Fowler', 'jacksmith@gmail.com', '2005-03-10', '2022-06-15', 5),
+('Rodney Anderson', 'michael35@brown.biz', '1999-09-19', '2023-06-03', 3),
+('Madison Alvarez', 'rmartin@hotmail.com', '2004-07-20', '2024-04-18', 5),
+('Vickie Waters', 'acarpenter@smith.com', '2006-03-22', '2023-02-27', 5),
+('Mr. Ryan Jones', 'emyers@hotmail.com', '2005-06-16', '2022-12-31', 5),
+('Monica Phillips', 'mike18@brown.com', '2001-10-05', '2024-12-11', 1),
+('Jeremy Barnett', 'fullerdawn@yahoo.com', '2000-08-26', '2024-06-09', 2),
+('Randy Hendricks', 'stephaniepadilla@smith.com', '1999-12-24', '2024-06-24', 4),
+('Joe Cole', 'perezcassandra@solomon.com', '2004-08-03', '2022-07-31', 2),
+('Anthony Monroe', 'kellyjames@yahoo.com', '2000-06-30', '2024-08-22', 4),
+('Jeremiah Hayden', 'lesliebowers@hotmail.com', '2006-01-09', '2023-06-14', 4),
+('Katherine Lang', 'asmith@hotmail.com', '2004-06-30', '2023-10-11', 2),
+('Andrew Palmer', 'paulahicks@hunter-rodriguez.info', '2001-11-01', '2022-10-21', 3),
+('Jesus Tran', 'michael86@hotmail.com', '2003-08-04', '2023-10-14', 5),
+('Sara Johnson', 'sroberson@holt.com', '2003-02-09', '2023-11-02', 3),
+('Nicolas Martin', 'sarahmorales@yahoo.com', '2000-05-24', '2022-07-01', 2),
+('Lisa Randolph', 'millerdavid@sweeney.com', '2002-05-09', '2022-07-30', 3),
+('Katherine Holt', 'rmiller@hotmail.com', '2006-12-28', '2024-07-05', 4),
+('Wesley Scott', 'bridget34@gmail.com', '2000-10-04', '2022-11-07', 5),
+('Jack Caldwell', 'cwilkins@gmail.com', '2006-12-25', '2024-01-23', 5),
+('Amber Mitchell', 'seanlowery@tyler.com', '2004-01-23', '2022-06-02', 5),
+('Erik Skinner', 'tammy17@smith.org', '2007-02-23', '2023-04-06', 1),
+('Michele Stewart', 'manningvictoria@franco.com', '2000-06-19', '2025-03-29', 5),
+('Shirley Norton', 'atkinsonkatherine@case.net', '2003-07-25', '2025-02-03', 4),
+('Jessica Diaz', 'gina75@villegas-gillespie.biz', '2001-09-26', '2025-05-09', 4),
+('Melissa Lee', 'christine75@jensen.com', '2006-11-10', '2023-08-04', 3),
+('Cameron Harper', 'piercedaniel@gmail.com', '2002-01-03', '2023-06-14', 5),
+('Joshua Small', 'kenneth61@yahoo.com', '2000-10-08', '2022-10-17', 2),
+('Kristi Stephens', 'jackkelley@gmail.com', '2006-03-27', '2023-07-05', 2),
+('Nathan Brown', 'williamschwartz@hotmail.com', '2003-05-14', '2023-11-02', 5),
+('Jodi Cross', 'mcdowellmelissa@luna-douglas.com', '2001-01-30', '2023-11-22', 4),
+('Christopher Morris', 'rnielsen@smith.org', '1999-06-12', '2022-09-23', 5);
+
 
 -- Insert Courses
-INSERT INTO Courses (course_name, credits, dept_id) VALUES
-('Intro to Programming', 3, 1),
-('Data Structures', 4, 1),
-('Marketing Principles', 3, 2),
-('Financial Accounting', 3, 2),
-('Thermodynamics', 3, 3),
-('Machine Design', 4, 3),
-('Cognitive Psychology', 3, 4),
-('Visual Design Basics', 3, 5);
+INSERT INTO Courses (name, credit_hour, department_id, classroom_id) VALUES
+('Intro to Programming', 3, 1, 1),
+('Data Structures', 4, 1, 2),
+('Marketing Basics', 3, 2, 3),
+('Financial Accounting', 3, 2, 4),
+('Thermodynamics', 3, 3, 5),
+('Machine Design', 4, 3, 6),
+('Cognitive Psychology', 3, 4, 7),
+('Visual Design Basics', 3, 5, 8);
+
 
 -- Insert Semesters
 INSERT INTO Semesters (name) VALUES
-('Spring 2025'),
-('Fall 2025');
+('Spring'),
+('Fall');
 
 -- Insert Classrooms
 INSERT INTO Classrooms (building, room_number, capacity) VALUES
-('Science Hall', '101', 60),
-('Business Center', '205', 45),
-('Engineering Block', '302', 70),
-('Psychology Wing', '104', 35),
-('Design Studio', '210', 40),
-('Main Building', '001', 80),
-('Annex A', 'B12', 50),
+('Science Hall', '101', 50),
+('Engineering Block', '202', 60),
+('Business Center', '303', 45),
+('Psychology Wing', '404', 35),
+('Design Studio', '505', 40),
+('Main Building', 'G01', 80),
+('Annex A', 'B12', 55),
 ('Library Hall', '3F', 65);
 
 -- Insert Enrollments (sample, repeat for 200 total)

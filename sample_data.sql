@@ -1,5 +1,5 @@
 
--- insert departments
+-------------
 INSERT INTO Departments (name) VALUES
 ('Computer Science'),
 ('Business Administration'),
@@ -7,7 +7,7 @@ INSERT INTO Departments (name) VALUES
 ('Psychology'),
 ('Media & Design');
 
--- Insert instructors
+-------------
 INSERT INTO Instructors (name, email, phone, department_id, hire_date) VALUES
 ('Alice Johnson', 'alice@example.com', '1234567890', 1, '2022-01-15'),
 ('Bob Smith', 'bob@example.com', '2345678901', 1, '2021-03-10'),
@@ -21,7 +21,7 @@ INSERT INTO Instructors (name, email, phone, department_id, hire_date) VALUES
 ('Jake Wood', 'jake@example.com', '0123456789', 5, '2020-04-08');
 
 
--- Insert Students
+-------------
 INSERT INTO Students (name, email, date_of_birth, enroll_date, department_id) VALUES
 ('Peter Sloan', 'emilysavage@hotmail.com', '1999-07-08', '2023-05-19', 2),
 ('Alicia Baker', 'ryandustin@yahoo.com', '2005-07-26', '2023-05-24', 5),
@@ -74,8 +74,9 @@ INSERT INTO Students (name, email, date_of_birth, enroll_date, department_id) VA
 ('Jodi Cross', 'mcdowellmelissa@luna-douglas.com', '2001-01-30', '2023-11-22', 4),
 ('Christopher Morris', 'rnielsen@smith.org', '1999-06-12', '2022-09-23', 5);
 
+--------------------
 
--- Insert Courses
+------------------------------------------------------------------------------
 INSERT INTO Courses (name, credit_hour, department_id, classroom_id) VALUES
 ('Intro to Programming', 3, 1, 1),
 ('Data Structures', 4, 1, 2),
@@ -85,14 +86,13 @@ INSERT INTO Courses (name, credit_hour, department_id, classroom_id) VALUES
 ('Machine Design', 4, 3, 6),
 ('Cognitive Psychology', 3, 4, 7),
 ('Visual Design Basics', 3, 5, 8);
+------------------------------------------------------------------------------
 
-
--- Insert Semesters
+-------------------------------------------------------------------------------------------
 INSERT INTO Semesters (name) VALUES
 ('Spring'),
 ('Fall');
-
--- Insert Classrooms
+--------------------------------------------------------------------------------------------------------
 INSERT INTO Classrooms (building, room_number, capacity) VALUES
 ('Science Hall', '101', 50),
 ('Engineering Block', '202', 60),
@@ -103,7 +103,7 @@ INSERT INTO Classrooms (building, room_number, capacity) VALUES
 ('Annex A', 'B12', 55),
 ('Library Hall', '3F', 65);
 
--- Insert Enrollments (sample, repeat for 200 total)
+-------------------------------------------------------------------------------------------
 INSERT INTO Enrollments (student_id, course_id, semester_id, grade) VALUES
 (22, 2, 2, 3.25),
 (36, 1, 2, 2.8),
@@ -305,3 +305,4 @@ INSERT INTO Enrollments (student_id, course_id, semester_id, grade) VALUES
 (28, 6, 1, 2.7),
 (33, 8, 2, 2.12),
 (22, 5, 2, 3.89);
+---------------------------------------
