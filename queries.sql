@@ -2,17 +2,11 @@
 -- QUERIES
 
 -- 1=Top 5 Students by GPA in the most recent semester
-SELECT 
-    Students.id,
-    Students.name,
-    Semesters.name,
-    AVG(Enrollments.grade) AS gpa
-FROM Enrollments
-JOIN Students ON Enrollments.student_id = Students.id
-JOIN Semesters ON Enrollments.semester_id = Semesters.id
-WHERE Enrollments.semester_id = (SELECT MAX(id) FROM Semesters)
-GROUP BY Students.id, Semesters.id
-ORDER BY gpa DESC
+SELECT id, name, name, AVG(grade)
+FROM student_course_grades
+WHERE name = 'Spring'
+GROUP BY id, name
+ORDER BY AVG(grade) DESC
 LIMIT 5;
 
 
@@ -41,21 +35,14 @@ GROUP BY Courses.id;
 
 
 -- 5=> All courses a particular student is enrolled in, ordered by semester
-SELECT Students.id, Students.name, Courses.name, Semesters.name
-FROM Enrollments
-JOIN Students ON Enrollments.student_id = Students.id
-JOIN Courses ON Enrollments.course_id = Courses.id
-JOIN Semesters ON Enrollments.semester_id = Semesters.id
-WHERE Students.id = 1  -- Change 1 to the student ID you want to check
-ORDER BY Semesters.id;
+SELECT student_id, student_name, course_name, semester_name
+FROM student_course_grades
+WHERE student_id = 1
+ORDER BY semester_name;
 
 -- 6=> Department statistics: avg class size
-SELECT Departments.id, Departments.name, 
-       COUNT(Enrollments.student_id) / NULLIF(COUNT(DISTINCT Courses.id), 0) AS average_class_size
-FROM Departments
-JOIN Courses ON Courses.department_id = Departments.id
-JOIN Enrollments ON Enrollments.course_id = Courses.id
-GROUP BY Departments.id;
+SELECT department_id, department_name, semester_name, average_class_size
+FROM department_load;
 
 
 -- 7=> Students at risk (GPA < 2.0 in any semester)
