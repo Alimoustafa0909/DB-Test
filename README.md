@@ -1,4 +1,6 @@
-1- Add first the Schema.sql to php my admin
-2-then add the sample_data.sql
-3-then add views.sql
-4-then try to the queries.sql
+
+
+1. First, upload schema.sql  
+2. Then, upload sample_data.sql  
+3. Then, upload views.sql  
+4. Last, run the queries one by one
