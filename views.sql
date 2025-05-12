@@ -1,7 +1,7 @@
--- View 1: Student Course Grades
+-- Student Course Grades View
 CREATE VIEW student_course_grades AS
 SELECT 
-    Students.id AS student_id,
+    Students.id AS student_id, 
     Students.name AS student_name,
     Courses.id AS course_id,
     Courses.name AS course_name,
@@ -13,7 +13,7 @@ JOIN Courses ON Enrollments.course_id = Courses.id
 JOIN Semesters ON Enrollments.semester_id = Semesters.id;
 
 
--- View 2: Course Enrollment Count
+-- Course Enrollment Count View
 CREATE VIEW course_enrollment_count AS
 SELECT 
     Courses.id AS course_id,
@@ -27,7 +27,7 @@ GROUP BY Courses.id, Semesters.id;
 
 
 
--- View 3: Department Load
+--Department Load View
 CREATE VIEW department_load AS
 SELECT 
     Departments.id AS department_id,
