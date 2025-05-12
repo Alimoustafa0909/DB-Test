@@ -2,10 +2,10 @@
 -- QUERIES
 
 -- 1=Top 5 Students by GPA in the most recent semester
-SELECT id, name, name, AVG(grade)
+SELECT student_id, student_name, course_name semester_name, AVG(grade)
 FROM student_course_grades
-WHERE name = 'Spring'
-GROUP BY id, name
+WHERE semester_name = 'Spring'
+GROUP BY student_id, semester_name
 ORDER BY AVG(grade) DESC
 LIMIT 5;
 
