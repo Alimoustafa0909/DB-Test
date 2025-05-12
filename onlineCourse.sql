@@ -201,25 +201,6 @@ WHERE NOT EXISTS (
     )
 );
 
--- 9-> Rank students within department by GPA
-SELECT Students.id, Students.name, Departments.name, 
-       RANK() OVER (PARTITION BY Departments.id ORDER BY AVG(Enrollments.grade) DESC) AS department_rank
-FROM Students
-JOIN Enrollments ON Students.id = Enrollments.student_id
-JOIN Departments ON Students.department_id = Departments.id
-GROUP BY Students.id, Departments.id;
-
--- 10=> Drop semester’s enrollments if empty
-SET @semester_id = 3;  -- Change to the semester you want to delete
-
-DELETE FROM Enrollments
-WHERE semester_id = @semester_id;
-
-DELETE FROM Semesters
-WHERE id = @semester_id
-AND NOT EXISTS (
-    SELECT 1 FROM Enrollments WHERE semester_id = @semester_id
-);
 
 -----------------
 -- SAMPLE DATA
